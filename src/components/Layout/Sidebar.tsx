@@ -29,6 +29,7 @@ const Sidebar: React.FC = () => {
     { name: 'Campaigns', href: '/campaigns', icon: MegaphoneIcon },
     { name: 'Templates', href: '/templates', icon: DocumentTextIcon },
     { name: 'Flow Builder', href: '/flows', icon: RectangleGroupIcon },
+    { name: 'Retargeting', href: '/retargeting', icon: MegaphoneIcon },
     { name: 'API Docs', href: '/api-docs', icon: CodeBracketIcon },
     { name: 'Settings', href: '/settings', icon: CogIcon },
   ];

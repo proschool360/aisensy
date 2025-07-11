@@ -25,6 +25,12 @@ import apiKeyRoutes from './routes/apiKey';
 import paymentRoutes from './routes/payment';
 import webhookRoutes from './routes/webhook';
 import adminRoutes from './routes/admin';
+import adminPlansRoutes from './routes/admin/plans';
+import adminUsersRoutes from './routes/admin/users';
+import handoffRoutes from './routes/handoff';
+import retargetRoutes from './routes/retarget';
+import formsRoutes from './routes/forms';
+import clicksRoutes from './routes/clicks';
 
 // Socket handlers
 import { initializeSocket } from './socket';
@@ -77,6 +83,12 @@ app.use('/api/api-keys', apiKeyRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/webhooks', webhookRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin/plans', adminPlansRoutes);
+app.use('/api/admin/users', adminUsersRoutes);
+app.use('/api/handoff', handoffRoutes);
+app.use('/api/retarget', retargetRoutes);
+app.use('/api/forms', formsRoutes);
+app.use('/api/clicks', clicksRoutes);
 
 // Socket.io
 initializeSocket(io);
