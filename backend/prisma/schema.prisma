@@ -22,6 +22,11 @@ model User {
   resetPasswordToken String?
   resetPasswordExpires DateTime?
   lastLogin         DateTime?
+  planId            String?
+  planStartDate     DateTime?
+  planEndDate       DateTime?
+  isTrialUsed       Boolean   @default(false)
+  quotaUsed         Json      @default("{}")
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -38,8 +43,127 @@ model User {
   teamMemberships   TeamMember[]
   ownedTeams        Team[]    @relation("TeamOwner")
   sessions          Session[]
+  plan              Plan?     @relation(fields: [planId], references: [id])
+  auditLogs         AuditLog[]
+  assignedChats     Message[] @relation("AssignedAgent")
+  agentTags         AgentTag[]
+  formSubmissions   FormSubmission[]
+  formBuilders      FormBuilder[]
+  retargetCampaigns RetargetCampaign[]
 
   @@map("users")
+}
+
+model Plan {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Float
+  currency    String   @default("USD")
+  interval    String   @default("month") // month, year
+  isActive    Boolean  @default(true)
+  features    Json     @default("[]")
+  limits      Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users User[]
+
+  @@map("plans")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  resource  String
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
+}
+
+model ClickLog {
+  id        String   @id @default(uuid())
+  messageId String
+  contactId String
+  buttonId  String
+  buttonText String
+  url       String?
+  clickedAt DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@map("click_logs")
+}
+
+model FormBuilder {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  description String?
+  fields      Json     @default("[]")
+  settings    Json     @default("{}")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions FormSubmission[]
+
+  @@map("form_builders")
+}
+
+model FormSubmission {
+  id        String   @id @default(uuid())
+  formId    String
+  contactId String
+  userId    String
+  data      Json
+  source    String   @default("whatsapp")
+  createdAt DateTime @default(now())
+
+  form    FormBuilder @relation(fields: [formId], references: [id], onDelete: Cascade)
+  contact Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("form_submissions")
+}
+
+model AgentTag {
+  id     String @id @default(uuid())
+  userId String
+  tagId  String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tagId])
+  @@map("agent_tags")
+}
+
+model RetargetCampaign {
+  id          String   @id @default(uuid())
+  userId      String
+  name        String
+  filters     Json     @default("{}")
+  templateId  String?
+  message     String?
+  status      String   @default("draft")
+  targetCount Int      @default(0)
+  sentCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template Template? @relation(fields: [templateId], references: [id])
+
+  @@map("retarget_campaigns")
 }
 
 model Session {
@@ -112,6 +236,11 @@ model Contact {
   profilePic  String?
   isBlocked   Boolean  @default(false)
   lastSeen    DateTime?
+  lastMessageAt DateTime?
+  isUnread    Boolean  @default(false)
+  hasReplied  Boolean  @default(false)
+  adSource    String?
+  fbAdId      String?
   source      ContactSource @default(MANUAL)
   customFields Json?
   createdAt   DateTime @default(now())
@@ -122,6 +251,8 @@ model Contact {
   attributes ContactAttribute[]
   messages Message[]
   campaignContacts CampaignContact[]
+  clickLogs ClickLog[]
+  formSubmissions FormSubmission[]
 
   @@unique([userId, phone])
   @@map("contacts")
@@ -135,6 +266,7 @@ model Tag {
   createdAt   DateTime @default(now())
 
   contacts ContactTag[]
+  agentTags AgentTag[]
 
   @@map("tags")
 }
@@ -196,6 +328,7 @@ model Template {
   whatsappAccount WhatsAppAccount @relation(fields: [whatsappAccountId], references: [id], onDelete: Cascade)
   campaigns       Campaign[]
   messages        Message[]
+  retargetCampaigns RetargetCampaign[]
 
   @@map("templates")
 }
@@ -270,6 +403,9 @@ model Message {
   contactId         String
   campaignId        String?
   templateId        String?
+  assignedAgentId   String?
+  isBotHandoff      Boolean       @default(false)
+  handoffReason     String?
   direction         MessageDirection
   type              MessageType   @default(TEXT)
   content           String
@@ -286,6 +422,8 @@ model Message {
   contact         Contact         @relation(fields: [contactId], references: [id], onDelete: Cascade)
   campaign        Campaign?       @relation(fields: [campaignId], references: [id])
   template        Template?       @relation(fields: [templateId], references: [id])
+  assignedAgent   User?           @relation("AssignedAgent", fields: [assignedAgentId], references: [id])
+  clickLogs       ClickLog[]
 
   @@map("messages")
 }

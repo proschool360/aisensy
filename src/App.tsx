@@ -16,6 +16,9 @@ import Settings from './pages/Settings';
 import APIDocumentation from './pages/APIDocumentation';
 import AdminPanel from './pages/AdminPanel';
 import Signup from './pages/Auth/Signup';
+import Retargeting from './pages/Retargeting';
+import PlansManager from './pages/admin/PlansManager';
+import UsersManager from './pages/admin/UsersManager';
 import { useAuth } from './contexts/AuthContext';
 
 const AppContent: React.FC = () => {
@@ -45,7 +48,10 @@ const AppContent: React.FC = () => {
           <Route path="/flows" element={<ProtectedRoute><FlowBuilder /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="/api-docs" element={<ProtectedRoute><APIDocumentation /></ProtectedRoute>} />
+          <Route path="/retargeting" element={<ProtectedRoute><Retargeting /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute requiredRole={['ADMIN', 'SUPER_ADMIN']}><AdminPanel /></ProtectedRoute>} />
+          <Route path="/admin/plans" element={<ProtectedRoute requiredRole={['ADMIN', 'SUPER_ADMIN']}><PlansManager /></ProtectedRoute>} />
+          <Route path="/admin/users" element={<ProtectedRoute requiredRole={['ADMIN', 'SUPER_ADMIN']}><UsersManager /></ProtectedRoute>} />
         </Routes>
       </div>
     </SocketProvider>
