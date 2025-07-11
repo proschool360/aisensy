@@ -46,6 +46,7 @@ const Sidebar: React.FC = () => {
   };
 
   return (
+    <>
     <div className="flex h-screen w-64 flex-col bg-gray-900 border-r border-gray-800">
       <div className="flex items-center justify-center h-16 bg-gray-800 border-b border-gray-700">
         <div className="flex items-center space-x-2">
@@ -80,8 +81,10 @@ const Sidebar: React.FC = () => {
       
       <div className="p-4 border-t border-gray-700">
         <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+            <span className="text-white text-sm font-medium">
               {user?.firstName?.charAt(0).toUpperCase() || 'U'}
-            <span className="text-white text-sm font-medium">JD</span>
+            </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">
@@ -99,6 +102,7 @@ const Sidebar: React.FC = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
